@@ -2,7 +2,7 @@ import Card from "~/components/Card";
 import type { Route } from "./+types/home";
 import ToggleTheme from '../components/ToggleTheme'
 import SearchComponent from "~/components/SearchComponent";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { Country } from "types/country";
 import { usePagination } from "~/hooks/usePagination";
 
@@ -45,6 +45,8 @@ export function meta({}: Route.MetaArgs) {
 export default function Home() {
 
 const [dataCountries, setDataCountries] = useState<Country[] | []>([])
+const loadMoreRef = useRef<HTMLDivElement>(null); 
+
 const {
   paginatedItems,
   loadMore,
@@ -58,7 +60,6 @@ const {
       try {
         const res = await fetch('/data.json');
         const data = await res.json();
-        // const page1 = data.slice(0, 10)
         setDataCountries(data)
 
       } catch (err) {
@@ -68,6 +69,29 @@ const {
 
     fetchCountries()
   }, [])
+
+  useEffect(() => {
+    if (!hasMore) return // jangan observe jika tidak ada lagi data
+
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        loadMore();
+      }
+    }, { threshold: [0, 1.0] }) // elemen 1px atau 100% terlihat
+
+    // jika target elemen sudah muncul di viewport maka trigger observer
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current)
+    }
+
+    return () => {
+      // cleanup function dijalankan ketika target elemen muncul kembali ke viewport
+      if (loadMoreRef.current) {
+        observer.unobserve(loadMoreRef.current)
+      }
+    }
+
+  }, [hasMore, loadMore]) // jalankan ulang efek jika hasMore / LoadMore berubah
 
 
 return (
@@ -80,7 +104,7 @@ return (
       </div>
 
       <div className="container mt-15 flex flex-col sm:flex-row justify-between">
-       {/* <SearchComponent search={setDataCountries}/> */}
+       <SearchComponent search={setDataCountries}/>
 
         <div className="max-sm:mt-10 text-gray-950 dark:text-white dark:bg-blue-900 p-4 w-[200px] shadow rounded-sm">
           <select name="filter" 
@@ -113,9 +137,10 @@ return (
             ))
           }
       </div>
-      <button onClick={loadMore}
-        className="py-2 px-10 text-xl mx-auto cursor-pointer bg-amber-300 rounded text-white"
-      >next page</button>
+      <div 
+        ref={loadMoreRef}
+        className="h-50 w-full"
+      ></div>
     </main>
   );
 }
