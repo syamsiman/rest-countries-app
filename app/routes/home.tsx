@@ -1,10 +1,10 @@
 import Card from "~/components/Card";
 import type { Route } from "./+types/home";
-import Data from '~/lib/data.json'
 import ToggleTheme from '../components/ToggleTheme'
 import SearchComponent from "~/components/SearchComponent";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Country } from "types/country";
+import { usePagination } from "~/hooks/usePagination";
 
 type Regions = {
   id: number;
@@ -43,7 +43,32 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-const [dataCountries, setDataCountries] = useState<Country[]>(Data)
+
+const [dataCountries, setDataCountries] = useState<Country[] | []>([])
+const {
+  paginatedItems,
+  loadMore,
+  hasMore
+} = usePagination({
+  data: dataCountries
+})
+
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const res = await fetch('/data.json');
+        const data = await res.json();
+        // const page1 = data.slice(0, 10)
+        setDataCountries(data)
+
+      } catch (err) {
+        console.log('gagal mengambil data', err);
+      }
+    }
+
+    fetchCountries()
+  }, [])
+
 
 return (
     <main className="dark:bg-blue-950 bg-grey-50">
@@ -55,7 +80,7 @@ return (
       </div>
 
       <div className="container mt-15 flex flex-col sm:flex-row justify-between">
-       <SearchComponent search={setDataCountries}/>
+       {/* <SearchComponent search={setDataCountries}/> */}
 
         <div className="max-sm:mt-10 text-gray-950 dark:text-white dark:bg-blue-900 p-4 w-[200px] shadow rounded-sm">
           <select name="filter" 
@@ -72,8 +97,11 @@ return (
       <div className="container mt-10 gap-15 grid justify-center
        sm:grid-cols-2 
       md:grid-cols-3 lg:grid-cols-4">
+        {paginatedItems.length === 0 && (
+          <p>tidak ada data </p>
+        )}
           {
-            dataCountries.map(data => (
+            paginatedItems.map(data => (
               <Card 
                 key={data.name}
                 img={data.flags.svg}
@@ -85,6 +113,9 @@ return (
             ))
           }
       </div>
+      <button onClick={loadMore}
+        className="py-2 px-10 text-xl mx-auto cursor-pointer bg-amber-300 rounded text-white"
+      >next page</button>
     </main>
   );
 }

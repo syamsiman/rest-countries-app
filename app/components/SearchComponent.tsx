@@ -1,15 +1,14 @@
 import { Search } from "lucide-react";
 import React, { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import type { Country } from "types/country";
-import { getAllCountries, searchCountryByName } from "~/controllers/countryController";
 
 const SearchComponent = ({search } : {search : React.Dispatch<SetStateAction<Country[]>>}) => {
  const [query, setQuery] = useState<string>("");
 
  const handleSearch = (event: React.ChangeEvent<HTMLInputElement> ) => {
-    setQuery(event.target.value)
-    const filteredCountry: Country[] = searchCountryByName(query);
-    search(filteredCountry)
+    // setQuery(event.target.value)
+    // const filteredCountry: Country[] = searchCountryByName(query);
+    // search(filteredCountry)
  }
 
   return (

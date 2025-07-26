@@ -1,0 +1,39 @@
+import { useCallback, useMemo, useState } from "react";
+import type { Country } from "types/country"
+
+
+interface UsePaginationOptions {
+    data: Country[];
+    initialItemsPerPage?: number /// jumlah item per halaman
+}
+
+export const usePagination = ({
+    data,
+    initialItemsPerPage = 10 // default 10 item per halaman
+}: UsePaginationOptions) => {
+
+    const [currentPage, setCurrentPage] = useState(1);
+
+    // logika paginasi. ambil hanya item yang relevan untuk halaman saat ini
+    const paginatedItems = useMemo(() => {
+        const endIndex = currentPage * initialItemsPerPage;
+        return data.slice(0, endIndex);
+    }, [data, currentPage])
+
+    // fungsi untuk memuat halaman berikutnya
+    const loadMore = () => {
+        setCurrentPage(prevPage => prevPage + 1);
+    }
+
+    // check apakah masih ada data yang bisa dimuat 
+    const hasMore = () => {
+        return paginatedItems.length < data.length;
+    }
+
+    return {
+        paginatedItems,
+        loadMore,
+        hasMore
+    }
+
+}
