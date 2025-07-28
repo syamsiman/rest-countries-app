@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Country } from "types/country"
 
 
@@ -14,20 +14,22 @@ export const usePagination = ({
 
     const [currentPage, setCurrentPage] = useState(1);
 
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [])
+
     // logika paginasi. ambil hanya item yang relevan untuk halaman saat ini
     const paginatedItems = useMemo(() => {
         const endIndex = currentPage * initialItemsPerPage;
         return data.slice(0, endIndex);
-    }, [data, currentPage])
+    }, [data, currentPage, initialItemsPerPage])
+
+    // check apakah masih ada data yang bisa dimuat 
+    const hasMore = paginatedItems.length < data.length;
 
     // fungsi untuk memuat halaman berikutnya
     const loadMore = () => {
-        setCurrentPage(prevPage => prevPage + 1);
-    }
-
-    // check apakah masih ada data yang bisa dimuat 
-    const hasMore = () => {
-        return paginatedItems.length < data.length;
+       if (hasMore) setCurrentPage(prevPage => prevPage + 1);
     }
 
     return {

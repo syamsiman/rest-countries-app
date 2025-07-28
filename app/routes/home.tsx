@@ -1,39 +1,13 @@
-import Card from "~/components/Card";
-import type { Route } from "./+types/home";
-import ToggleTheme from '../components/ToggleTheme'
-import SearchComponent from "~/components/SearchComponent";
 import { useState, useEffect, useRef } from "react";
-import type { Country } from "types/country";
+import Card from "~/components/Card";
+import ToggleTheme from "~/components/ToggleTheme";
+import SearchInput from "~/components/SearchInput";
 import { usePagination } from "~/hooks/usePagination";
+import { useSearch } from "~/hooks/useSearch";
+import type { Country } from "types/country";
+import type { Route } from "./+types/home";
 
-type Regions = {
-  id: number;
-  name: string;
-}
-
-const regions: Regions[] = [
-  {
-    id: 1,
-    name: "Africa"
-  },
-  {
-    id: 2,
-    name: "America"
-  },
-  {
-    id: 3,
-    name: "Asia"
-  },
-  {
-    id: 4,
-    name: "Europe"
-  },
-  {
-    id: 5,
-    name: "Oceania"
-  }
-]
-
+const regions = ["Africa", "America", "Asia", "Europe", "Oceania"];
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -43,59 +17,92 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
+  const [dataCountries, setDataCountries] = useState<Country[]>([]);
+  const [selectedRegion, setSelectedRegion] = useState("default");
+  const [loading, setLoading] = useState(true);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
-const [dataCountries, setDataCountries] = useState<Country[] | []>([])
-const loadMoreRef = useRef<HTMLDivElement>(null); 
-
-const {
-  paginatedItems,
-  loadMore,
-  hasMore
-} = usePagination({
-  data: dataCountries
-})
-
+  // Fetch all countries once
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const res = await fetch('/data.json');
-        const data = await res.json();
-        setDataCountries(data)
-
+        const res = await fetch("/data.json");
+        const data: Country[] = await res.json();
+        setDataCountries(data);
       } catch (err) {
-        console.log('gagal mengambil data', err);
+        console.error("Gagal mengambil data", err);
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+    fetchCountries();
+  }, []);
 
-    fetchCountries()
-  }, [])
+  // Search logic
+  const {
+    searchTerm,
+    setSearchTerm,
+    debouncedSearchTerm,
+    isSearching,
+    filteredItems,
+    loadMoreFilter,
+  } = useSearch({
+    data: dataCountries,
+  });
 
+  // Pagination logic
+  const {
+    paginatedItems,
+    loadMore,
+    hasMore,
+  } = usePagination({
+    data: dataCountries,
+  });
+
+  // Determine final items (search or paginated)
+  const baseItems = isSearching ? filteredItems : paginatedItems;
+
+  // Apply region filter (if any)
+  const displayItems =
+    selectedRegion === "default"
+      ? baseItems
+      : baseItems.filter((item) => item.region.toLowerCase().includes(selectedRegion.toLowerCase()));
+
+  // Filter region jika aktif
+// const regionFiltered = selectedRegion === "default"
+//   ? (isSearching ? filteredItems : paginatedItems)
+//   : (isSearching ? filteredItems : paginatedItems).filter(item =>item.region.toLowerCase().includes(selectedRegion.toLowerCase()));
+
+
+//   const displayItems = regionFiltered;
+  // Infinite scroll for pagination only
   useEffect(() => {
-    if (!hasMore) return // jangan observe jika tidak ada lagi data
+    if (isSearching || !hasMore) return;
 
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) {
-        loadMore();
+        if (isSearching && filteredItems) {
+          loadMoreFilter(); // load next page of filtered items
+        } else if (hasMore) {
+          loadMore(); // load next page of all items
+        }
       }
-    }, { threshold: [0, 1.0] }) // elemen 1px atau 100% terlihat
+    });
 
-    // jika target elemen sudah muncul di viewport maka trigger observer
     if (loadMoreRef.current) {
-      observer.observe(loadMoreRef.current)
+      observer.observe(loadMoreRef.current);
     }
 
     return () => {
-      // cleanup function dijalankan ketika target elemen muncul kembali ke viewport
       if (loadMoreRef.current) {
-        observer.unobserve(loadMoreRef.current)
+        observer.unobserve(loadMoreRef.current);
       }
-    }
+    };
+  }, [isSearching, hasMore, loadMore, loadMoreFilter]);
 
-  }, [hasMore, loadMore]) // jalankan ulang efek jika hasMore / LoadMore berubah
-
-
-return (
-    <main className="dark:bg-blue-950 bg-grey-50">
+  return (
+    <main className="dark:bg-blue-950 bg-grey-50 min-h-screen">
+      {/* Header */}
       <div className="dark:bg-blue-900 bg-white shadow shadow-blue-950/10">
         <div className="container flex items-center justify-between py-4 text-grey-950 dark:text-white">
           <h2 className="text-2xl font-bold">Where in the world?</h2>
@@ -103,44 +110,49 @@ return (
         </div>
       </div>
 
+      {/* Search & Filter */}
       <div className="container mt-15 flex flex-col sm:flex-row justify-between">
-       <SearchComponent search={setDataCountries}/>
+        <SearchInput currentSearchTerm={searchTerm} onSearch={setSearchTerm} />
 
         <div className="max-sm:mt-10 text-gray-950 dark:text-white dark:bg-blue-900 p-4 w-[200px] shadow rounded-sm">
-          <select name="filter" 
+          <select
+            name="filter"
             className="outline-0 cursor-pointer bg-white dark:bg-blue-900 w-full"
-            >
+            value={selectedRegion}
+            onChange={(e) => setSelectedRegion(e.target.value)}
+          >
             <option value="default">Filter by region</option>
-            {regions.map(({id, name}) => (
-              <option key={id} value={name}>{name}</option>
+            {regions.map((region) => (
+              <option key={region} value={region}>
+                {region}
+              </option>
             ))}
           </select>
         </div>
       </div>
 
-      <div className="container mt-10 gap-15 grid justify-center
-       sm:grid-cols-2 
-      md:grid-cols-3 lg:grid-cols-4">
-        {paginatedItems.length === 0 && (
-          <p>tidak ada data </p>
+      {/* Content */}
+      <div className="container mt-10 gap-15 grid justify-center sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {loading ? (
+          <p>Loading data...</p>
+        ) : displayItems.length === 0 ? (
+          <p>Tidak ada hasil ditemukan.</p>
+        ) : (
+          displayItems.map((item) => (
+            <Card
+              key={item.name}
+              img={item.flags.svg}
+              population={item.population}
+              name={item.name}
+              capital={item.capital}
+              region={item.region}
+            />
+          ))
         )}
-          {
-            paginatedItems.map(data => (
-              <Card 
-                key={data.name}
-                img={data.flags.svg}
-                population={data.population}
-                name={data.name}
-                capital={data.capital}
-                region={data.region}
-              />
-            ))
-          }
       </div>
-      <div 
-        ref={loadMoreRef}
-        className="h-50 w-full"
-      ></div>
+
+      {/* Infinite Scroll Trigger */}
+      <div ref={loadMoreRef} className="h-50 w-full" />
     </main>
   );
 }

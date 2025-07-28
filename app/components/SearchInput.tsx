@@ -1,14 +1,16 @@
 import { Search } from "lucide-react";
-import React, { useEffect, useState, type Dispatch, type SetStateAction } from "react";
-import type { Country } from "types/country";
+import React, { type SetStateAction } from "react";
 
-const SearchComponent = ({search } : {search : React.Dispatch<SetStateAction<Country[]>>}) => {
- const [query, setQuery] = useState<string>("");
+
+interface SearchInputProps {
+   currentSearchTerm: string;
+   onSearch: React.Dispatch<SetStateAction<string>>;
+}
+
+const SearchInput = ({onSearch, currentSearchTerm}: SearchInputProps) => {
 
  const handleSearch = (event: React.ChangeEvent<HTMLInputElement> ) => {
-    // setQuery(event.target.value)
-    // const filteredCountry: Country[] = searchCountryByName(query);
-    // search(filteredCountry)
+    onSearch(event.target.value)
  }
 
   return (
@@ -17,7 +19,7 @@ const SearchComponent = ({search } : {search : React.Dispatch<SetStateAction<Cou
         <Search size={25} className="text-gray-400" />
         <input 
         type="text" 
-        value={query}
+        value={currentSearchTerm}
         onChange={handleSearch}
         placeholder="search for a country.." 
         className="outline-none ml-3 text-gray-400 dark:text-white w-full h-full"/>
@@ -25,4 +27,4 @@ const SearchComponent = ({search } : {search : React.Dispatch<SetStateAction<Cou
   )
 }
 
-export default SearchComponent
+export default SearchInput
