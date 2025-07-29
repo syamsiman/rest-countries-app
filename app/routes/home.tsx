@@ -45,22 +45,12 @@ export default function Home() {
     debouncedSearchTerm,
     isSearching,
     filteredItems,
-    loadMoreFilter,
   } = useSearch({
-    data: dataCountries,
-  });
-
-  // Pagination logic
-  const {
-    paginatedItems,
-    loadMore,
-    hasMore,
-  } = usePagination({
-    data: dataCountries,
+    data: dataCountries
   });
 
   // Determine final items (search or paginated)
-  const baseItems = isSearching ? filteredItems : paginatedItems;
+  const baseItems = isSearching ? filteredItems : dataCountries;
 
   // Apply region filter (if any)
   const displayItems =
@@ -68,24 +58,23 @@ export default function Home() {
       ? baseItems
       : baseItems.filter((item) => item.region.toLowerCase().includes(selectedRegion.toLowerCase()));
 
-  // Filter region jika aktif
-// const regionFiltered = selectedRegion === "default"
-//   ? (isSearching ? filteredItems : paginatedItems)
-//   : (isSearching ? filteredItems : paginatedItems).filter(item =>item.region.toLowerCase().includes(selectedRegion.toLowerCase()));
+  // Pagination logic
+  const {
+    paginatedItems,
+    loadMore,
+    hasMore,
+  } = usePagination({
+    data: displayItems,
+    dependencies: [debouncedSearchTerm, selectedRegion]
+  });
 
-
-//   const displayItems = regionFiltered;
   // Infinite scroll for pagination only
   useEffect(() => {
-    if (isSearching || !hasMore) return;
+    if (!hasMore) return;
 
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) {
-        if (isSearching && filteredItems) {
-          loadMoreFilter(); // load next page of filtered items
-        } else if (hasMore) {
-          loadMore(); // load next page of all items
-        }
+        loadMore()
       }
     });
 
@@ -98,7 +87,7 @@ export default function Home() {
         observer.unobserve(loadMoreRef.current);
       }
     };
-  }, [isSearching, hasMore, loadMore, loadMoreFilter]);
+  }, [debouncedSearchTerm, hasMore, loadMore]);
 
   return (
     <main className="dark:bg-blue-950 bg-grey-50 min-h-screen">
@@ -135,10 +124,10 @@ export default function Home() {
       <div className="container mt-10 gap-15 grid justify-center sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {loading ? (
           <p>Loading data...</p>
-        ) : displayItems.length === 0 ? (
+        ) : paginatedItems.length === 0 ? (
           <p>Tidak ada hasil ditemukan.</p>
         ) : (
-          displayItems.map((item) => (
+          paginatedItems.map((item) => (
             <Card
               key={item.name}
               img={item.flags.svg}

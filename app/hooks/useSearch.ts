@@ -4,17 +4,14 @@ import type { Country } from "types/country";
 interface UseSearchOptions {
   data: Country[]; // terima data dari luar, bukan fetch sendiri
   debounceDelay?: number;
-  initialItemsPerPage?: number;
 }
 
 export const useSearch = ({
   data,
   debounceDelay = 300,
-  initialItemsPerPage = 10,
 }: UseSearchOptions) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const [filteredItems, setFilteredItems] = useState<Country[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
@@ -26,11 +23,6 @@ export const useSearch = ({
 
     return () => clearTimeout(handler);
   }, [searchTerm, debounceDelay]);
-
-  // Reset halaman ketika user ubah kata kunci
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [debouncedSearchTerm]);
 
   const performFiltering = useCallback(
     (term: string, items: Country[]): Country[] => {
@@ -54,13 +46,8 @@ export const useSearch = ({
     }
 
     const filtered = performFiltering(debouncedSearchTerm, data);
-    const endIndex = currentPage * initialItemsPerPage;
-    setFilteredItems(filtered.slice(0, endIndex));
-  }, [debouncedSearchTerm, currentPage, initialItemsPerPage, performFiltering, data]);
-
-  const loadMoreFilter = () => {
-    setCurrentPage((prev) => prev + 1);
-  };
+    setFilteredItems(filtered);
+  }, [debouncedSearchTerm, performFiltering, data]);
 
   return {
     searchTerm,
@@ -68,6 +55,5 @@ export const useSearch = ({
     debouncedSearchTerm,
     isSearching,
     filteredItems,
-    loadMoreFilter,
   };
 };
