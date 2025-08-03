@@ -6,8 +6,9 @@ import { usePagination } from "~/hooks/usePagination";
 import { useSearch } from "~/hooks/useSearch";
 import type { Country } from "types/country";
 import type { Route } from "./+types/home";
+import CardSkeleton from "~/components/CardSkeleton";
 
-const regions = ["Africa", "America", "Asia", "Europe", "Oceania"];
+const regions: string[] = ["Africa", "America", "Asia", "Europe", "Oceania"];
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -20,6 +21,7 @@ export default function Home() {
   const [dataCountries, setDataCountries] = useState<Country[]>([]);
   const [selectedRegion, setSelectedRegion] = useState("default");
   const [loading, setLoading] = useState(true);
+  const [isScrollingLoading, setIsScrollingLoading] = useState(false)
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // Fetch all countries once
@@ -28,6 +30,8 @@ export default function Home() {
       try {
         const res = await fetch("/data.json");
         const data: Country[] = await res.json();
+        const randomTimer = Math.floor(Math.random() * (5000 - 1000 + 1)) + 1000; // fake delay
+        await new Promise(resolve => setTimeout(resolve, randomTimer))
         setDataCountries(data);
       } catch (err) {
         console.error("Gagal mengambil data", err);
@@ -72,9 +76,11 @@ export default function Home() {
   useEffect(() => {
     if (!hasMore) return;
 
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        loadMore()
+    const observer = new IntersectionObserver(async (entries) => {
+      if (entries[0].isIntersecting && hasMore) {
+        setIsScrollingLoading(true)
+        await loadMore()
+        setIsScrollingLoading(false)
       }
     });
 
@@ -100,7 +106,7 @@ export default function Home() {
       </div>
 
       {/* Search & Filter */}
-      <div className="container mt-15 flex flex-col sm:flex-row justify-between">
+      <div className={`container dark:bg-blue-950 bg-grey-50 py-10 sticky top-0 left-0 mt-15 flex flex-col sm:flex-row justify-between`}>
         <SearchInput currentSearchTerm={searchTerm} onSearch={setSearchTerm} />
 
         <div className="max-sm:mt-10 text-gray-950 dark:text-white dark:bg-blue-900 p-4 w-[200px] shadow rounded-sm">
@@ -123,7 +129,7 @@ export default function Home() {
       {/* Content */}
       <div className="container mt-10 gap-15 grid justify-center sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {loading ? (
-          <p>Loading data...</p>
+          <CardSkeleton count={10} />
         ) : paginatedItems.length === 0 ? (
           <p>Tidak ada hasil ditemukan.</p>
         ) : (
@@ -131,13 +137,15 @@ export default function Home() {
             <Card
               key={item.name}
               img={item.flags.svg}
-              population={item.population}
+              population={item.population.toLocaleString()}
               name={item.name}
               capital={item.capital}
               region={item.region}
             />
           ))
         )}
+
+        {isScrollingLoading && (<CardSkeleton count={10} />)}
       </div>
 
       {/* Infinite Scroll Trigger */}

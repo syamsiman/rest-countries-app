@@ -30,8 +30,12 @@ export const usePagination = ({
     const hasMore = paginatedItems.length < data.length;
 
     // fungsi untuk memuat halaman berikutnya
-    const loadMore = () => {
-       if (hasMore) setCurrentPage(prevPage => prevPage + 1);
+    const loadMore = async () => {
+       if (hasMore) {
+            const randomTimer = Math.floor(Math.random() * (3000 - 1000 + 1)) + 1000; // fake loading
+            await new Promise(resolve => setTimeout(resolve, randomTimer))
+            setCurrentPage(prevPage => prevPage + 1);
+        }
     }
 
     return {

@@ -1,15 +1,24 @@
+import { redirect, useNavigate } from "react-router";
 
 interface CardProps {
     img: string;
     name: string;
-    population: number;
+    population: string;
     region: string;
     capital?: string;
 }
 
 const Card = ({img, name, population, region, capital}: CardProps) => {
+  let navigate = useNavigate();
+  
+  const handleClick = () => {
+    navigate(`/detail/${name}`)
+  }
+
   return (
-    <div className="card hover:cursor-pointer">
+    <div className="card hover:cursor-pointer"
+      onClick={handleClick}
+    >
         <img src={img} 
         className="object-contain"
         alt="region" />
