@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import Card from "~/components/Card";
-import ToggleTheme from "~/components/ToggleTheme";
 import SearchInput from "~/components/SearchInput";
 import { usePagination } from "~/hooks/usePagination";
 import { useSearch } from "~/hooks/useSearch";
@@ -96,15 +95,7 @@ export default function Home() {
   }, [debouncedSearchTerm, hasMore, loadMore]);
 
   return (
-    <main className="dark:bg-blue-950 bg-grey-50 min-h-screen">
-      {/* Header */}
-      <div className="dark:bg-blue-900 bg-white shadow shadow-blue-950/10">
-        <div className="container flex items-center justify-between py-4 text-grey-950 dark:text-white">
-          <h2 className="text-2xl font-bold">Where in the world?</h2>
-          <ToggleTheme />
-        </div>
-      </div>
-
+    <>
       {/* Search & Filter */}
       <div className={`container dark:bg-blue-950 bg-grey-50 py-10 sticky top-0 left-0 mt-15 flex flex-col sm:flex-row justify-between`}>
         <SearchInput currentSearchTerm={searchTerm} onSearch={setSearchTerm} />
@@ -150,6 +141,6 @@ export default function Home() {
 
       {/* Infinite Scroll Trigger */}
       <div ref={loadMoreRef} className="h-50 w-full" />
-    </main>
+    </>
   );
 }

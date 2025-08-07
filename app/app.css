@@ -18,7 +18,7 @@
 @layer utilities {
   .container {
     /* max-width: 440px; */
-    @apply max-w-[1400px] mx-auto px-4 sm:px-6;
+    @apply max-w-[1400px] mx-auto px-5 sm:px-6;
   }
 }
 
@@ -48,6 +48,20 @@
   div {
     span {
       @apply text-sm text-grey-400 font-normal;
+    }
+  }
+
+}
+
+
+.detail-list {
+  @apply space-y-2;
+
+  li {
+    @apply text-grey-950 dark:text-white font-medium;
+
+    span {
+      @apply dark:text-white dark:text-grey-400 font-normal text-sm;
     }
   }
 }

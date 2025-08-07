@@ -9,6 +9,8 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import ToggleTheme from "~/components/ToggleTheme";
+
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -42,7 +44,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return(
+    <main className="dark:bg-blue-950 bg-grey-50 min-h-screen">
+       {/* Header */}
+      <div className="dark:bg-blue-900 bg-white shadow shadow-blue-950/10">
+        <div className="container flex items-center justify-between py-4 text-grey-950 dark:text-white">
+          <h2 className="text-2xl font-bold">Where in the world?</h2>
+          <ToggleTheme />
+        </div>
+      </div>
+      <Outlet />
+    </main>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
