@@ -14,7 +14,7 @@ const SearchInput = ({onSearch, currentSearchTerm}: SearchInputProps) => {
  }
 
   return (
-    <div className="w-md flex dark:bg-blue-900 bg-white shadow shadow-gray-950/10 rounded-sm 
+    <div className="w-full sm:w-md flex dark:bg-blue-900 bg-white shadow shadow-gray-950/10 rounded-sm 
     p-4 justify-between items-center">
         <Search size={25} className="text-gray-400" />
         <input 

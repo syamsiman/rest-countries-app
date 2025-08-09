@@ -7,7 +7,7 @@ interface CardSkeletonProps {
 
 const CardSkeleton: React.FC<CardSkeletonProps> = ({ count = 1 }) => {
   const skeletons = Array.from({ length: count }).map((_, index) => (
-    <div key={index} className='card-skeleton h-[350px]'>
+    <div key={index} className='card-skeleton'>
         <div className="w-full h-[50%] bg-skeleton relative">
             <div className='skeleton-wave'></div>
         </div>

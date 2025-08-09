@@ -3,16 +3,24 @@ import type { Route } from "../+types/root"
 import { useLoaderData } from "react-router";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router";
+import { fetchData } from "~/lib/fetchData";
+import NotFound from "~/components/NotFound";
 
-export async function clientLoader({params}: Route.LoaderArgs) {
+export async function loader({params, request}: Route.LoaderArgs) {
     try {
-        const res = await fetch("/data.json");
-        const data: Country[] = await res.json();
-        await new Promise(res => setTimeout(res, 2000)) // fake delay
+        const data = await fetchData();
+        // Validate data format
+        if (!data || !Array.isArray(data)) {  
+            throw new Error("Invalid data format");
+        }
+
         const filtered = data.find((item) => item.name.toLowerCase() === params.name?.toLowerCase());
         return filtered;
     } catch (err) {
-        console.error(err);
+       throw new Response("failed to fetch data", {
+        status: 500,
+        statusText: "internal server error"
+       })
     }
 }
 
@@ -23,12 +31,11 @@ export function HydrateFallback() {
 const Detail = () => {
 const Navigate = useNavigate();
 
-const country = useLoaderData<typeof clientLoader>()
+const country = useLoaderData<typeof loader>()
 if (!country) {
-    return <div className="container pt-10">Country not found</div>
+    return <NotFound/>
   }
 
-  console.log(country);
 return (
     <div className="container pt-10">
       <div className="mt-5">
@@ -76,7 +83,7 @@ return (
                       {border}
                     </span>
                   ))) : (
-                  <span className="text-grey-500">No Border Countries</span>
+                  <span className="text-grey-950 dark:text-white ml-4 text-sm">No Border Countries</span>
                   )
                 }
               </div>

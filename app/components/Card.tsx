@@ -20,7 +20,7 @@ const Card = ({img, name, population, region, capital}: CardProps) => {
       onClick={handleClick}
     >
         <img src={img} 
-        className="object-contain"
+        className="object-contain drop-shadow-md"
         alt="region" />
         <div className="p-4 text-gray-950 dark:text-white ">
             <h2 className="text-xl my-4 font-bold">{name}</h2>
