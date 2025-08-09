@@ -28,9 +28,9 @@ const ToggleTheme = () => {
   return (
     <button 
     onClick={toggleTheme}
-    className="flex gap-x-2 transition-all duration-1000 items-center cursor-pointer text-[15px]">
+    className="flex gap-x-1 sm:gap-x-2 transition-all duration-1000 items-center cursor-pointer text-sm sm:text-[15px]">
         {darkMode ? <Moon fill="white" /> : <Moon/>}
-        Dark Mode
+        <span className="text-nowrap">Dark Mode</span>
     </button>
   )
 }

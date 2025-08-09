@@ -18,7 +18,7 @@
 @layer utilities {
   .container {
     /* max-width: 440px; */
-    @apply max-w-[1400px] mx-auto px-5 sm:px-6;
+    @apply max-w-[1400px] mx-auto px-5 py-10 sm:px-6;
   }
 }
 
@@ -33,7 +33,7 @@
 }
 
 .card-skeleton {
-  @apply bg-card-skeleton dark:bg-blue-900 h-[350px] max-w-md shadow-md relative overflow-hidden;
+  @apply bg-card-skeleton dark:bg-blue-900 h-[350px] w-[257px] sm:w-full shadow-md overflow-hidden;
 }
 
 .skeleton-wave {
@@ -44,7 +44,7 @@
 }
 
 .card {
-  @apply max-w-md dark:bg-blue-900 bg-white shadow-md;
+  @apply w-[257px] sm:w-full dark:bg-blue-900 bg-white shadow-md;
   div {
     span {
       @apply text-sm text-grey-400 font-normal;
@@ -58,10 +58,10 @@
   @apply space-y-2;
 
   li {
-    @apply text-grey-950 dark:text-white font-medium;
+    @apply text-grey-950 dark:text-white font-semibold sm:text-lg;
 
     span {
-      @apply dark:text-white dark:text-grey-400 font-normal text-sm;
+      @apply dark:text-blue-50 text-grey-400 font-normal text-sm sm:text-[1rem];
     }
   }
 }

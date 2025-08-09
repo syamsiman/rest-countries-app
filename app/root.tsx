@@ -49,7 +49,7 @@ export default function App() {
        {/* Header */}
       <div className="dark:bg-blue-900 bg-white shadow shadow-blue-950/10">
         <div className="container flex items-center justify-between py-4 text-grey-950 dark:text-white">
-          <h2 className="text-2xl font-bold">Where in the world?</h2>
+          <h2 className="text-base sm:text-2xl font-bold">Where in the world?</h2>
           <ToggleTheme />
         </div>
       </div>
